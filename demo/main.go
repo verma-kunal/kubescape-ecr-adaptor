@@ -24,7 +24,8 @@ import (
 // vulnerabilityOut returns the scan results
 func vulnerabilityOut(output *ecr.DescribeImageScanFindingsOutput) {
 
-	fmt.Println(*output.ImageScanFindings.Findings[1].Name)
+	// printing out the description of one of the vulnerabilities:
+	fmt.Println(*output.ImageScanFindings.Findings[0].Description)
 
 }
 
