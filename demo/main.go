@@ -10,22 +10,29 @@ import (
 	"log"
 )
 
-/*
-import (
-	"context"
-	"fmt"
-	"log"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ecr"
-)
-*/
-
 // vulnerabilityOut returns the scan results
 func vulnerabilityOut(output *ecr.DescribeImageScanFindingsOutput) {
 
-	// printing out the description of one of the vulnerabilities:
-	fmt.Println(*output.ImageScanFindings.Findings[0].Description)
+	findings := output.ImageScanFindings.Findings                   // array
+	severityCount := output.ImageScanFindings.FindingSeverityCounts // map
+	scanStatus := output.ImageScanStatus
+
+	// fetching all the scan findings:
+	for index := range findings {
+		fmt.Printf("{%v - %v} {%v}\n\n", *findings[index].Name, *findings[index].Description, findings[index].Severity)
+		//fmt.Printf("%v\n", *findings[index].Uri) // the URLs for all severities (more info)
+	}
+
+	fmt.Println(" -------------------------------------------------------------------------------")
+
+	// fetching total severity count:
+	for key, value := range severityCount {
+		fmt.Println(key, "=>", value)
+	}
+	fmt.Println(" -------------------------------------------------------------------------------")
+
+	// printing out the scan status:
+	fmt.Printf("%v", *scanStatus.Description)
 
 }
 
@@ -41,6 +48,7 @@ func main() {
 	// Creating an ECR service client:
 	client := ecr.NewFromConfig(cfg)
 
+	// entering the details of the image - of which we want to find the vulnerabilities
 	scanFindings, err := client.DescribeImageScanFindings(ctx, &ecr.DescribeImageScanFindingsInput{
 		ImageId: &types.ImageIdentifier{
 			ImageDigest: aws.String("sha256:5045e645eb8963b389d773acd5b769020a0ad893564484c3bd9554186104c6d3"),
